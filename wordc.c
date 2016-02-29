@@ -192,7 +192,6 @@ struct list* add_additional_list_element (char val[30], int j) {
             
         }
     }
-    test_print();
     return ptr;
 }
 
