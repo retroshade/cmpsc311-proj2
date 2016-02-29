@@ -318,6 +318,7 @@ void print_list (FILE *file2) {
     ptr = head;
     //printf("ptr word is %s\n", ptr->word);
     do {
+        fprintf(file2, "%s, %d\n", ptr->word, ptr->count);
         ptr = ptr->next;
     }
     while (ptr->next != 0);
