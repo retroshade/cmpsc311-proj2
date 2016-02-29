@@ -1,0 +1,28 @@
+must accept 4th cmd line arg  
+  -denotes degree of concurrency (number of processes)
+if more than 1 process, then program must make extra processes using fork()
+each of n processes will cary out word counting over 1/n words/bytes, while respecting word boundaries
+  -read file, get wordcount
+  -each section will contain wordcount/n words
+Parent must create n-1 pipes using pipe()
+  -1 for reading infor from each of its children
+  -must convey range of words that child is supposed to count
+  -each child must carry out word counting for its section of words
+  -pass its output to parent (using appropriate pipe())
+  -parent must merge outcomes of its own "mini-wc" with its children's outputs to create final output
+    -will write to file
+Each child should indicate to parent that it has finished it mini-wc via signal (kill()) that parent must implement signal handler for
+
+******* $ ./wordc-mp.c input-file output-countfile output-runtime n********
+
+-case sensitive
+-any data structures
+tarball -> cmpsc311_project.tar.gz
+  -README(.md)
+  -source files
+    -no .o files
+  -Makefile
+  
+Performance
+  -std deviation
+  -timing
