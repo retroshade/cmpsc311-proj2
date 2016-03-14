@@ -18,15 +18,32 @@ int main(int argc, char **argv) {
     double execution_time;
     begin = clock();
     
-    char * arg1, * arg2, * arg3;
+    char * arg1, * arg2, * arg3;//*arg4
     arg1 = argv[1];
     arg2 = argv[2];
     arg3 = argv[3];
+    //arg4 = argv[4];//number of times file should be parsed
     
     // open the files
     FILE *file1 = fopen(arg1, "r");
     FILE *file2 = fopen(arg2, "w");
     FILE *file3 = fopen(arg3, "w");
+    
+    //pid_t childpid;
+    
+    //This forks the parent, creating the children
+    /*for (i = 1; i < n-1; i++)         //not sure if this should b n or n-1
+        if ((childpid = fork()) <= 0)   //I think it should be 1 less than the max, so that the parent can sort one of those partitions
+            break;
+    */
+    
+    /*
+                            p
+                           /|\
+                          / | \
+                         /  |  \
+                        c1 c2  c3...cn-1
+    */
     
     // check to make sure that the files opened correctly. if not, exit the program with an error.
     if (file1 == NULL | file2 == NULL | file3 == NULL) {
@@ -43,7 +60,9 @@ int main(int argc, char **argv) {
     
     //printf("Allocated space for head and current\n");
     
-    
+    //We want to count the number of words using the below code to know ho many to give to the parent and each child
+    //count may satisfy our needs
+    //TOTAL/specified-number-of-file-divisions
     int input_text;
     char temp_word[30] = {(char)0};
     char temp_letter;
@@ -83,6 +102,10 @@ int main(int argc, char **argv) {
         else {} // it is a special character and should be ignored
         
     }
+    
+    /*After  finding out the number of words in the file, parse the file into n partitions
+    One of those will be be sorted by the parent
+    The rest will be sorted by the child processes*/
     
     // add last word
     add_additional_list_element(temp_word, i);
