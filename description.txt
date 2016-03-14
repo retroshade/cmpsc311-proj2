@@ -11,7 +11,8 @@ Parent must create n-1 pipes using pipe()
   -pass its output to parent (using appropriate pipe())
   -parent must merge outcomes of its own "mini-wc" with its children's outputs to create final output
     -will write to file
-Each child should indicate to parent that it has finished it mini-wc via signal (kill()) that parent must implement signal handler for
+//*****Each child should indicate to parent that it has finished it mini-wc via signal (kill()) that parent must implement signal handler for*****//
+(Above //*****code*****// no longer valid for project 2)
 
 ******* $ ./wordc-mp.c input-file output-countfile output-runtime n********
 
