@@ -245,6 +245,30 @@ int main(int argc, char **argv) {
         add_additional_list_element(temp_word, i);
     }
     
+    /*if (childpid == 0) {      //a child process
+        if (close(fd[1] == -1) {
+            perror("Child's end of pipe failed to close");                    
+            return 1;
+        }
+        else {                  //close end of pipe
+            //write into pipe
+        }
+        
+    }
+    else if (childpid > 0) {    //parent process
+        if (close(fd[0] == -1) {
+            perror("Child's end of pipe failed to close");                    
+            return 1;        
+        }
+        else {                  //close end of pipe
+            //read from pipe
+        }
+    }
+    else {  //hasn't forked correctly, might be redundant if checked at fork time
+        printf("Failed to fork correctly");
+    }
+    */
+    
     // print the results to the new files
     //print_list(file2);
     printf("made it to the print_test function\n");
