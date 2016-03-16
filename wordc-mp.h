@@ -1,17 +1,20 @@
 //
-//  wordc.h
+//  wordc-mp.h
 //  
-//
+
 
 #ifndef wordc_h
 #define wordc_h
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <errno.h>
 #include <ctype.h>
 #include <time.h>
 #include <string.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 struct list {
     char word[30];
@@ -30,5 +33,6 @@ bool search_list (char val[30]);
 struct list* find_existing_node (char val[30]);
 struct list* find_prior_node (char val[30]);
 void print_list (FILE *file2);
+void print_test();
 
-#endif /* wordc_h */
+#endif /* wordc_mp_h */
