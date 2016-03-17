@@ -251,8 +251,8 @@ int main(int argc, char **argv) {
             return 1;
         }
         else {                  //close end of pipe
-            //write into pipe
-        }
+            write(fd, must be a const buf, sizeof(count*sizeof(char)))  //write into pipe
+        }                                               //^not sure how big this should be, because I'm not sure of the size needed
         
     }
     else if (childpid > 0) {    //parent process
@@ -261,7 +261,7 @@ int main(int argc, char **argv) {
             return 1;        
         }
         else {                  //close end of pipe
-            //read from pipe
+            read(fd, buf, sizeof(count*sizeof(char)))                   //read from pipe
         }
     }
     else {  //hasn't forked correctly, might be redundant if checked at fork time
