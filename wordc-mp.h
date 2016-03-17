@@ -34,5 +34,6 @@ struct list* find_existing_node (char val[30]);
 struct list* find_prior_node (char val[30]);
 void print_list (FILE *file2);
 void print_test();
+void sort(struct list *new);
 
 #endif /* wordc_mp_h */
