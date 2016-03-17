@@ -87,8 +87,6 @@ int main(int argc, char **argv) {
         parentCount += modOverflow;
     }
     
-    printf("parent count is %d\n", parentCount);
-    printf("child count is %d\n", childCount);
     
     // communicate which words each process will be reading
     int startWord[processNum];
@@ -99,39 +97,42 @@ int main(int argc, char **argv) {
         int counter = 1; // starting word
         if (n == 0) { // it is the parent
             startWord[n] = counter;
+            printf("parent\n");
+            printf("startword is %d\n", startWord[n]);
         }
         else if (n == 1) { // it is a child and right after the parent
             startWord[n] = parentCount + startWord[m];
+            printf("startword is %d\n", startWord[n]);
             endWord[m] = startWord[n] - 1;
-            printf("endword number is %d\n", endWord[m]);
+            printf("endword is %d\n", endWord[m]);
             m++;
         }
         else { // it is a subsequent child
             startWord[n] = childCount + startWord[m];
+            printf("startword is %d\n", startWord[n]);
             endWord[m] = startWord[n] - 1;
-            printf("endword number is %d\n", endWord[m]);
+            printf("endword is %d\n", endWord[m]);
             m++;
         }
-        printf("startword number is %d\n", startWord[n]);
     }
     
     // add ending word
     endWord[m] = count;
-    printf("endword number is %d\n", endWord[m]);
+    printf("endword is %d\n", endWord[m]);
     
     pid_t childpid;
-    int fd[2];
+    int fd[(processNum - 1)][2];
     
     // forks the parent, creating the children and pipes
     int i;
     int specificStartingWord = 0;
     int specificEndingWord;
     
-    for (i = 0; i < processNum; i++) {
-        if (pipe(fd)) {
+    for (i = 0; i < (processNum -1); i++) {
+        if (pipe(fd[i])) {
             printf("pipe failed\n");
         }
-        printf("created pipe\n");
+        printf("created pipe in %d\n", i);
         printf("created new child\n");
         childpid = fork();
         if (childpid < 0) { // error with fork()
@@ -139,30 +140,24 @@ int main(int argc, char **argv) {
             break;
         }
         if (childpid > 0 && specificStartingWord == 0) {
-            printf("it is a parent\n");
             specificStartingWord = startWord[i];
-            printf("starting word is %d\n", specificStartingWord);
             specificEndingWord = endWord[i];
-            printf("ending word is %d\n", specificEndingWord);
-            i++;
+            //i++;
         }
         
         else if (childpid == 0) { // it is a child
-            printf("it is a child\n");
-            if (i == 0)
-                i++;
-            specificStartingWord = startWord[i];
-            printf("starting word is %d\n", specificStartingWord);
-            specificEndingWord = endWord[i];
-            printf("ending word is %d\n", specificEndingWord);
-            printf("break\n");
+            //if (i == 0)
+                //i++;
+            int childNumber = i - 1;
+            printf("child number is %d\n", i);
+            specificStartingWord = startWord[i + 1];
+            specificEndingWord = endWord[i + 1];
             break;
         }
         else{}
      }
 
 
-    printf("continuing\n");
     head = (struct list*) malloc (sizeof (struct list));
     current = (struct list*) malloc (sizeof (struct list));
     head->count = 0;
@@ -170,27 +165,23 @@ int main(int argc, char **argv) {
     current = head;
     input_text = '\0';
     
-    i = 0;
+    int u = 0;
     int g;
     int counter = 1;
-    printf("specific ending word is %d\n", specificEndingWord);
     
     rewind(file1);
     
     while ((input_text = fgetc(file1)) != EOF && counter <= specificEndingWord) { //&& counter <= specificEndingWord) {
-        printf("Parsing file\n");
         
         if (isalpha(input_text)) {
             // convert it to an alpha and store it in array
             input_text = tolower(input_text);
             temp_letter = (char)(input_text);
-            temp_word[i] = temp_letter;
-            printf("%s\n", temp_word);
-            i++;
+            temp_word[u] = temp_letter;
+            u++;
         }
         else if ((input_text == ' ') | (input_text == '\n')) { // there is a space so the word should end
             // the word should be added to the linked list.
-            printf("Word has ended\n");
             
             if (temp_word[0] == '\0') { // counter shouldn't increment because there isn't a word
                 counter--;
@@ -198,76 +189,103 @@ int main(int argc, char **argv) {
             
             else if (counter < specificStartingWord) {
                 // don't store the word
-                printf("don't store-- not in range\n");
                 
             }
             
             else if (head->word[0] == '\0' && counter >= specificStartingWord) {
-                printf("head is empty\n");
-                add_first_list_element(temp_word, i);
+                add_first_list_element(temp_word, u);
                 
             }
             else {
-                add_additional_list_element(temp_word, i);
+                add_additional_list_element(temp_word, u);
                 
             }
             
             // set temp_word back to null
-            printf("clearing out temp_word\n");
             int j;
-            for (j = 0; j < i; j++) {
+            for (j = 0; j < u; j++) {
                 temp_word[j] = '\0';
             }
-            i = 0;
+            u = 0;
             
             counter++;
-            printf("word counter = %d\n", counter);
         }
         else {} // it is a special character and should be ignored
     }
     
     // add last word
     
-    printf("word counter after = %d\n", counter);
     if (temp_word[0] == '\0') { // counter shouldn't increment because there isn't a word
         counter--;
     }
     else if (counter < specificStartingWord) {
         // don't store the word
-        printf("don't store-- not in range\n");
     }
     else if (head->word[0] == '\0' && counter >= specificStartingWord) {
-        printf("head is empty\n");
-        add_first_list_element(temp_word, i);
+        add_first_list_element(temp_word, u);
         
     }
     else {
-        add_additional_list_element(temp_word, i);
+        add_additional_list_element(temp_word, u);
     }
     
-    /*if (childpid == 0) {      //a child process
-        if (close(fd[1] == -1) {
-            perror("Child's end of pipe failed to close");                    
-            return 1;
+    // communicate results to the parent
+    
+    struct list *ptr1 = (struct list*) malloc (sizeof (struct list));
+    struct list *ptr2 = (struct list*) malloc (sizeof (struct list));
+    int bytesIN;
+    // 0 is reading, 1 is writing
+    if (childpid == 0) {
+        printf("child\n");
+        printf("head is %s\n", head->word);
+        printf("child number is %d\n", i);
+        ptr1 = head;
+        printf("ptr1 is %s\n", ptr1->word);
+        //dup2(fd[i][1], 1);
+        close(fd[i][0]);
+        
+         while (ptr1->word[0] != '\0') {
+            printf("loop val sent is %s\n", ptr1->word);
+             
+             bytesIN = write(fd[i][1], ptr1, sizeof(ptr1));
+             printf("bytesIN = %d\n", bytesIN);
+            if (bytesIN <= 0)
+                printf("failed\n");
+            printf("loop val sent is %s\n", ptr1->word);
+            ptr1 = ptr1->next;
         }
-        else {                  //close end of pipe
-            write(fd, must be a const buf, sizeof(count*sizeof(char)))  //write into pipe
-        }                                               //^not sure how big this should be, because I'm not sure of the size needed
+        
+        close(fd[i][1]);
+        exit(0);
+    }
+    
+    else {
+        
+        printf("parent\n");
+        printf("head is %s\n", head->word);
+        printf("parent waiting\n");
+        wait(NULL);
+        printf("parent resume\n");
+        int y;
+        for (y = 0; y < (processNum - 1); y++) {
+            //dup2(fd[y][0], 0);
+            close(fd[y][1]);
+            int t;
+            for (t = 0; t < 2; t++)
+            {
+            read(fd[y][0], ptr2, sizeof(ptr2));
+            printf("val received is %s\n", ptr2->word);
+            }
+            close(fd[y][0]);
+        }
+        //ptr1 = ptr2;
         
     }
-    else if (childpid > 0) {    //parent process
-        if (close(fd[0] == -1) {
-            perror("Child's end of pipe failed to close");                    
-            return 1;        
-        }
-        else {                  //close end of pipe
-            read(fd, buf, sizeof(count*sizeof(char)))                   //read from pipe
-        }
-    }
-    else {  //hasn't forked correctly, might be redundant if checked at fork time
-        printf("Failed to fork correctly");
-    }
-    */
+    
+    printf("val received after is %s\n", ptr2->word);
+    
+    // sort the results
+    
     
     // print the results to the new files
     //print_list(file2);
@@ -278,7 +296,7 @@ int main(int argc, char **argv) {
     // stop the clock and print result
     end = clock();
     execution_time = (long double)(end - begin) / CLOCKS_PER_SEC;
-    fprintf(file3, "Execution Time: %f seconds\n", execution_time);
+    //fprintf(file3, "Execution Time: %f seconds\n", execution_time);
 
     
     // close file streams when finished
@@ -327,7 +345,6 @@ struct list* add_additional_list_element (char val[30], int j) {
     else { // add a new node
         search_ptr = find_prior_node(val);
         if (search_ptr == NULL) { // add the node to the end of the list
-            printf("add node to end of list\n");
             int i;
             for (i = 0; i < j; i++){
                 ptr->word[i] = val[i];
@@ -341,7 +358,6 @@ struct list* add_additional_list_element (char val[30], int j) {
         else if (search_ptr == head) // the new word becomes the new head
         {
             struct list *switch_ptr = (struct list*) malloc (sizeof (struct list));
-            printf("word becomes new head\n");
             int i;
             for (i = 0; i < j; i++){
                 ptr->word[i] = val[i];
@@ -519,8 +535,11 @@ void print_test() {
         ptr = ptr->next;
     } while (ptr->next != 0);
     if (ptr->word[0] != '\0') {
-        printf("in the while statement\n");
         printf("%s, %d\n", ptr->word, ptr->count);
     }
     printf("finished print function\n");
+}
+
+void sort(struct list *new) {
+    
 }
