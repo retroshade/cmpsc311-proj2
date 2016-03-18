@@ -246,12 +246,13 @@ int main(int argc, char **argv) {
         
          while (ptr1->word[0] != '\0') {
             printf("loop val sent is %s\n", ptr1->word);
-             
-             bytesIN = write(fd[i][1], ptr1, sizeof(ptr1));
-             printf("bytesIN = %d\n", bytesIN);
-            if (bytesIN <= 0)
-                printf("failed\n");
-            printf("loop val sent is %s\n", ptr1->word);
+            printf("loop count sent is %d\n", ptr1->count);
+             write(fd[i][1], ptr1, sizeof(ptr1));
+             write(fd[i][1], &ptr1->count, sizeof(ptr1->count));
+             //bytesIN = write(fd[i][1], ptr1, sizeof(ptr1));
+             //printf("bytesIN = %d\n", bytesIN);
+            //if (bytesIN <= 0)
+              //  printf("failed\n");
             ptr1 = ptr1->next;
         }
         
@@ -267,24 +268,47 @@ int main(int argc, char **argv) {
         wait(NULL);
         printf("parent resume\n");
         int y;
-        for (y = 0; y < (processNum - 1); y++) {
+        int t;
+        for (t = 0; t < parentCount; t++)
+        {
+            printf("parentCount is %d\n", parentCount);
+            printf("first for loop\n");
+            close(fd[0][1]);
+            read(fd[0][0], ptr2, sizeof(ptr2));
+            read(fd[0][0], &ptr2->count, sizeof(ptr2->count));
+            printf("val received is %s\n", ptr2->word);
+            printf("count received is %d\n", ptr2->count);
+            sort(ptr2);
+            
+        }
+       // sort(ptr2);
+        close(fd[0][0]);
+        
+        
+        if (processNum >= 2) {
+        for (y = 1; y < (processNum - 1); y++) {
+            printf("second for loop\n");
             //dup2(fd[y][0], 0);
             close(fd[y][1]);
-            int t;
-            for (t = 0; t < 2; t++)
+            //int t;
+            for (t = 0; t < childCount; t++)
             {
-            read(fd[y][0], ptr2, sizeof(ptr2));
-            printf("val received is %s\n", ptr2->word);
+                read(fd[y][0], ptr2, sizeof(ptr2));
+                printf("val received is %s\n", ptr2->word);
+                sort(ptr2);
             }
+            //sort(ptr2);
             close(fd[y][0]);
+            }
         }
-        //ptr1 = ptr2;
+        
         
     }
+    printf("sort final word\n");
+    sort(ptr2);
     
     printf("val received after is %s\n", ptr2->word);
     
-    // sort the results
     
     
     // print the results to the new files
@@ -397,6 +421,86 @@ struct list* add_additional_list_element (char val[30], int j) {
     return ptr;
 }
 
+struct list* add_additional_list_element_parent (char val[30], int j, int count) {
+    printf("Add additional element PARENT function\n");
+    struct list *ptr = (struct list*) malloc (sizeof (struct list));
+    struct list *search_ptr = (struct list*) malloc (sizeof (struct list));
+    if (NULL == ptr | NULL == search_ptr) {
+        printf("Node creation failed.\n");
+    }
+    bool search;
+    search = search_list(val);
+    
+    if (search == 1) { // the word already exists-- find the node and increment the count value
+        printf("increment node value\n");
+        search_ptr = find_existing_node(val);
+        printf("count is %d\n", count);
+        printf("searchptr count is %d\n", search_ptr->count);
+        search_ptr->count += count;
+        printf("new searchptr count is %d\n", search_ptr->count);
+        
+    }
+    else { // add a new node
+        search_ptr = find_prior_node(val);
+        if (search_ptr == NULL) { // add the node to the end of the list
+            printf("add word to end\n");
+            int i;
+            for (i = 0; i < j; i++){
+                ptr->word[i] = val[i];
+            }
+            ptr->next = 0;
+            ptr->count = count;
+            current->next = ptr;
+            printf("word in current is %s\n", current->word);
+            current = ptr;
+            printf("new word in current is %s\n", current->word);
+            
+            
+        }
+        
+        else if (search_ptr == head) // the new word becomes the new head
+        {
+            struct list *switch_ptr = (struct list*) malloc (sizeof (struct list));
+            int i;
+            for (i = 0; i < j; i++){
+                ptr->word[i] = val[i];
+            }
+            
+            ptr->count = count;
+            
+            switch_ptr = head;
+            printf("word in switch is now %s\n", switch_ptr->word); // hello
+            ptr->next = switch_ptr;
+            
+            
+            head = ptr;
+            printf("word in head is now %s\n", head->word);
+            
+        }
+        else {
+            int i;
+            for (i = 0; i < j; i++){
+                ptr->word[i] = val[i];
+            }
+            //printf("new word in ptr is %s\n", ptr->word); // lit
+            ptr->count = count;
+            
+            struct list *moving_ptr = (struct list*) malloc (sizeof (struct list));
+            if (NULL == moving_ptr) {
+                printf("Node creation failed.\n");
+            }
+            
+            moving_ptr = search_ptr; // word in moving ptr is hello
+            moving_ptr = moving_ptr->next; // word in moving ptr is world
+            ptr->next = moving_ptr;
+            search_ptr->next = ptr;
+            
+        }
+    }
+    return ptr;
+}
+
+
 bool search_list (char val[30]) {
     //printf("Search function\n");
     struct list *ptr = (struct list*) malloc (sizeof (struct list));
@@ -407,10 +511,10 @@ bool search_list (char val[30]) {
     int i;
     do {
         i = strcmp(val, ptr->word);
-        printf("i is %d\n", i); // if val ahead of ptr->word in alphabet then will return a positive number-- keep going until they are equal or negative
+        //printf("i is %d\n", i); // if val ahead of ptr->word in alphabet then will return a positive number-- keep going until they are equal or negative
         ptr = ptr->next;
     } while (ptr != 0 && i > 0);
-    printf("end do while\n");
+    //printf("end do while\n");
     
     if (i == 0) {
         printf("word already exists\n");
@@ -434,11 +538,11 @@ struct list* find_existing_node (char val[30]) {
     ptr = head;
     int search;
     search = strcmp(val, ptr->word);
-    printf("Search is %d\n", search);
+    //printf("Search is %d\n", search);
     while (search != 0) {
         ptr = ptr->next;
         search = strcmp(val, ptr->word);
-        printf("Search is %d\n", search);
+        //printf("Search is %d\n", search);
     }
     
     return ptr;
@@ -461,14 +565,14 @@ struct list* find_prior_node (char val[30]) {
     
     // search the head node
     search = strcmp(val, curr->word);
-    printf("Search head node is %d\n", search);
+    //printf("Search head node is %d\n", search);
     if (search < 0) {
         printf("head is being returned\n");
         return head;
     }
     if (ptr->next != NULL) { // move curr to the node ahead of ptr
         curr = curr->next;
-        printf("word in curr is %s\n", curr->word);
+        //printf("word in curr is %s\n", curr->word);
         search = strcmp(val, curr->word);
     }
     else if (ptr->next == NULL) { // there is only the headnode and the word goes at the end
@@ -479,21 +583,21 @@ struct list* find_prior_node (char val[30]) {
     // val is lower in the alphabet than the word in the headnode
     while (search > 0 && curr != NULL) {
         // ptr becomes the same as curr
-        printf("move ptr to next\n");
+        //printf("move ptr to next\n");
         ptr = ptr->next;
         // curr moves to the next node
-        printf("move curr to next\n");
+        //printf("move curr to next\n");
         curr = curr->next;
         // search searches curr node
-        printf("search curr\n");
+        //printf("search curr\n");
         if (curr != NULL) {
-            printf("inside if statement\n");
+            //printf("inside if statement\n");
             search = strcmp(val, curr->word);
-            printf("Search is %d\n", search);
+            //printf("Search is %d\n", search);
         }
         else {
             search = 0;
-            printf("Search is %d\n", search);
+            //printf("Search is %d\n", search);
         }
     }
     
@@ -541,5 +645,11 @@ void print_test() {
 }
 
 void sort(struct list *new) {
+    printf("inside sort function\n");
+
+    printf("word in the sort function currently is %s\n", new->word);
+    printf("count in the sort function currently is %d\n", new->count);
+    
+    add_additional_list_element_parent(new->word, strlen(new->word) + 1, new->count);
     
 }
