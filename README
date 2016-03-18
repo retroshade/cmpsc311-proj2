@@ -30,9 +30,11 @@ instance of any particular word within that list.
 III - Difficulties, etc.
 =======================================================================================
 One of the hardest things, which we could have expected, was creating and using the 
-pipes. This difficulty mainly arose because we have never used them before. We also ran into som trouble when piping the final word of the text file back into the parent 
+pipes. This difficulty mainly arose because we have never used them before. We also ran 
+into som trouble when piping the final word of the text file back into the parent 
 process. When we initially ran the tests, the last word was being counted a seemingly
-random amount of extra times. At one point, the last word was being "sorted" and counted 5 extra times. Another, 6 extra times. 
+random amount of extra times. At one point, the last word was being "sorted" and 
+counted 5 extra times. Another, 6 extra times. 
 =======================================================================================
 
 IV - System Calls and Library Functions
@@ -44,23 +46,109 @@ strcmp(), fprintf()
 
 V - Design Choices
 =======================================================================================
-We decided that we would keep the linked list, since it made the most sense in terms of implementation. We also opted to break the adding of elements to the linked list into 
+We decided that we would keep the linked list, since it made the most sense in terms of 
+implementation. We also opted to break the adding of elements to the linked list into 
 multiple different functions, in order to account for the first elemnt in the list, any 
-element throughout the list, and the final element. We decided to implement the file descriptors as 2D arrays. This allowed us to have a specific set for each child.
+element throughout the list, and the final element. We decided to implement the file 
+descriptors as 2D arrays. This allowed us to have a specific set for each child.
 =======================================================================================
 
 VI - Performance Results
 =======================================================================================
+Poject 1 Times
+---------------------------------------------------------------------------------------
 Pangur Ban
 
--
+1.Execution Time: 0.030000 seconds
+2.Execution Time: 0.030000 seconds
+3.Execution Time: 0.030000 seconds
+4.Execution Time: 0.030000 seconds
+5.Execution Time: 0.030000 seconds
+6.Execution Time: 0.030000 seconds
+7.Execution Time: 0.030000 seconds
+8.Execution Time: 0.030000 seconds
+9.Execution Time: 0.030000 seconds
+10.Execution Time: 0.030000 seconds
+11.Execution Time: 0.030000 seconds
+12.Execution Time: 0.030000 seconds
+13.Execution Time: 0.030000 seconds
+14.Execution Time: 0.030000 seconds
+15.Execution Time: 0.040000 seconds
+16.Execution Time: 0.030000 seconds
+17.Execution Time: 0.030000 seconds
+18.Execution Time: 0.040000 seconds
+19.Execution Time: 0.030000 seconds
+20.Execution Time: 0.030000 seconds
+
+Mean - 0.031 seconds
+Standard Deviation - 0.00308 seconds
 
 Hamlet
 
--
+1.Execution Time: 1.100000 seconds
+2.Execution Time: 1.110000 seconds
+3.Execution Time: 1.120000 seconds
+4.Execution Time: 1.110000 seconds
+5.Execution Time: 1.120000 seconds
+6.Execution Time: 1.110000 seconds
+7.Execution Time: 1.110000 seconds
+8.Execution Time: 1.120000 seconds
+9.Execution Time: 1.110000 seconds
+10.Execution Time: 1.120000 seconds
+11.Execution Time: 1.110000 seconds
+12.Execution Time: 1.120000 seconds
+13.Execution Time: 1.160000 seconds
+14.Execution Time: 1.120000 seconds
+15.Execution Time: 1.110000 seconds
+16.Execution Time: 1.130000 seconds
+17.Execution Time: 1.120000 seconds
+18.Execution Time: 1.120000 seconds
+19.Execution Time: 1.110000 seconds
+20.Execution Time: 1.110000 second
+
+Mean - 1.117 seconds
+Standard Deviation - 0.01218 seconds
 
 Arabian Nights
 
--
+1.Execution Time: 47.850000 seconds
+2.Execution Time: 47.500000 seconds
+3.Execution Time: 47.630000 seconds
+4.Execution Time: 47.290000 seconds
+5.Execution Time: 47.880000 seconds
+6.Execution Time: 47.240000 seconds
+7.Execution Time: 47.360000 seconds
+8.Execution Time: 47.550000 seconds
+9.Execution Time: 47.140000 seconds
+10.Execution Time: 47.450000 seconds
+11.Execution Time: 47.320000 seconds
+12.Execution Time: 48.010000 seconds
+13.Execution Time: 47.490000 seconds
+14.Execution Time: 47.210000 seconds
+15.Execution Time: 47.870000 seconds
+16.Execution Time: 47.680000 seconds
+17.Execution Time: 45.690000 seconds
+18.Execution Time: 47.170000 seconds
+19.Execution Time: 48.390000 seconds
+20.Execution Time: 48.020000 seconds
 
+Mean - 47.487 seconds
+Standard Deviation - 0.53997 seconds
+
+---------------------------------------------------------------------------------------
+Poject 2 Times
+---------------------------------------------------------------------------------------
+Pangur Ban
+
+
+
+Hamlet
+
+
+
+Arabian Nights
+
+
+
+---------------------------------------------------------------------------------------
 =======================================================================================
