@@ -156,6 +156,11 @@ int main(int argc, char **argv) {
         }
         else{}
      }
+    
+    if (processNum == 1) { // there is only the parent
+        specificStartingWord = 1;
+        specificEndingWord = count;
+    }
 
 
     head = (struct list*) malloc (sizeof (struct list));
@@ -165,14 +170,15 @@ int main(int argc, char **argv) {
     current = head;
     input_text = '\0';
     
+    rewind(file1);
     //fclose(file1);
-    file1 = fopen(arg1, "r");
+    //file1 = fopen(arg1, "r");
     
     int u = 0;
     int g;
     int counter = 1;
     
-    rewind(file1);
+    
     
     while ((input_text = fgetc(file1)) != EOF && counter <= specificEndingWord) { //&& counter <= specificEndingWord) {
         
@@ -185,6 +191,7 @@ int main(int argc, char **argv) {
         }
         else if ((input_text == ' ') | (input_text == '\n')) { // there is a space so the word should end
             // the word should be added to the linked list.
+            printf("temp word is %s\n", temp_word);
             
             if (temp_word[0] == '\0') { // counter shouldn't increment because there isn't a word
                 counter--;
