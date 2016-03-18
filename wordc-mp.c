@@ -1,4 +1,4 @@
-//
+// Project 2-- Hayley Sundra and Ryan Mysliwiec
 //  wordc-mp.c
 //
 
@@ -14,43 +14,41 @@ int main(int argc, char **argv) {
     double execution_time;
     begin = clock();
     
+    // collect the arguments
     char * arg1, * arg2, * arg3, * arg4;
     arg1 = argv[1];
     arg2 = argv[2];
     arg3 = argv[3];
     arg4 = argv[4]; //number of processes
     const int processNum = atoi(arg4);
-    printf("arg4 is %s\n", arg4);
-    printf("number of processes is %d\n", processNum);
     
     // open the files
-    //FILE *file1 = fopen(arg1, "r");
-    //int file1 = open(arg1, O_RDONLY);
     FILE *file1 = fopen(arg1, "r");
     FILE *file2 = fopen(arg2, "w");
     FILE *file3 = fopen(arg3, "w");
     
-    // check to make sure that the files opened correctly. if not, exit the program with an error.
+    // check to make sure that the files opened correctly
     if (file1 == NULL | file2 == NULL | file3 == NULL) {
         perror("Error opening file");
         return(-1);
     }
     
-    // parse the input text file to count the number of words in the file
+    // parse the input text file to count the total number of words in the file
     int input_text;
     char temp_letter;
     char temp_word[30] = {(char)0};
-    int count = 0;
-    int j = 0;
+    int count = 0; // variable for total number of words in file
+    int j = 0; // iterates over each letter in every word
+    
     while ((input_text = fgetc(file1)) != EOF) {
-        if (isalpha(input_text)) {
+        if (isalpha(input_text)) { // it is a letter so store the letter
             input_text = tolower(input_text);
             temp_letter = (char)(input_text);
             temp_word[j] = temp_letter;
             j++;
         }
-        else if ((input_text == ' ') | (input_text == '\n')) { // there is a space so the word should end
-            if (temp_word[0] == '\0') {
+        else if ((input_text == ' ') | (input_text == '\n')) { // there is a space so the word should end and count should increment
+            if (temp_word[0] == '\0') { // the word is null so don't store anything
                 j = 0;
             }
             else {
@@ -67,103 +65,96 @@ int main(int argc, char **argv) {
         else {} // it is a special character and should be ignored
     }
     
-    // add final word
+    // add final word after the file ends if temp_word is not empty
     if (temp_word[0] != '\0') {
         count++;
-        // clear final word
+        // clear final temp_word
         int k;
         for (k = 0; k <= j; k++) {
             temp_word[k] = '\0';
         }
     }
     
-    printf("count is %d\n", count);
-    
     // calculate how many words each process will parse
-    int childCount;
-    int parentCount;
-    int modOverflow;
-    parentCount = childCount = (count / processNum);
+    int childCount; // the number of words each child should count
+    int parentCount; // the number of words each parent should count
+    int modOverflow; // calculate overflow
+    parentCount = childCount = (count / processNum); // calculate child count and parentCount
     if ((modOverflow = count % processNum) != 0) {
-        // unevenly divided words per number of processes
+        // unevenly divided words per number of processes, so add excess to parentCount
         parentCount += modOverflow;
     }
     
-    
-    // communicate which words each process will be reading
+    // communicate which words each process will be reading to the arrays startWord and endWord
     int startWord[processNum];
     int endWord[processNum];
-    int n;
-    int m = 0;
-    for (n = 0; n < (processNum); n++) {
+    int n; // iterator n
+    int m = 0; // iterator m to keep track of the index right before n
+    for (n = 0; n < (processNum); n++) { // iterate through each process
         int counter = 1; // starting word
-        if (n == 0) { // it is the parent
+        if (n == 0) {
+            // it is the parent
             startWord[n] = counter;
-            printf("parent\n");
-            printf("startword is %d\n", startWord[n]);
         }
-        else if (n == 1) { // it is a child and right after the parent
-            startWord[n] = parentCount + startWord[m];
-            printf("startword is %d\n", startWord[n]);
-            endWord[m] = startWord[n] - 1;
-            printf("endword is %d\n", endWord[m]);
+        else if (n == 1) {
+            // it is the first child right after the parent
+            startWord[n] = parentCount + startWord[m]; // must start counting after (parentCount) number of words
+            endWord[m] = startWord[n] - 1; // store endWord for the previous index
             m++;
         }
-        else { // it is a subsequent child
-            startWord[n] = childCount + startWord[m];
-            printf("startword is %d\n", startWord[n]);
-            endWord[m] = startWord[n] - 1;
-            printf("endword is %d\n", endWord[m]);
+        else {
+            // it is a subsequent child
+            startWord[n] = childCount + startWord[m]; // must start counting after (childCount) number of words
+            endWord[m] = startWord[n] - 1; // store endWord for the previous index
             m++;
         }
     }
     
-    // add ending word
+    // add the last endWord for the last process
     endWord[m] = count;
-    printf("endword is %d\n", endWord[m]);
     
+    // restart the input file from the beginning
     rewind(file1);
     
     pid_t childpid;
+    
+    // multi-dimensional array to to store the pipes based on processNum so that it can change for the processNum input
     int fd[(processNum - 1)][2];
     
     // forks the parent, creating the children and pipes
     int i;
+    // specific starting word and ending word variable for each process
     int specificStartingWord = 0;
     int specificEndingWord;
     
-    for (i = 0; i < (processNum -1); i++) {
+    for (i = 0; i < (processNum - 1); i++) {
         if (pipe(fd[i])) {
             printf("pipe failed\n");
         }
-        printf("created pipe in %d\n", i);
-        printf("created new child\n");
         childpid = fork();
-        if (childpid < 0) { // error with fork()
-            printf("break\n");
+        if (childpid < 0) {
+            // error with fork()
             break;
         }
         if (childpid > 0 && specificStartingWord == 0) {
+            // it is the parent
             specificStartingWord = startWord[i];
             specificEndingWord = endWord[i];
-            //i++;
         }
         
         else if (childpid == 0) { // it is a child
-            //if (i == 0)
-                //i++;
-            int childNumber = i - 1;
-            printf("child number is %d\n", i);
+            int childNumber = i - 1; // assign each child an index, starting with 0
             specificStartingWord = startWord[i + 1];
             specificEndingWord = endWord[i + 1];
+            //close and reopen the file to prevent race condition
             fclose(file1);
             file1 = fopen(arg1, "r");
             break;
         }
-        else{}
+        else {}
      }
     
-    if (processNum == 1) { // there is only the parent
+    if (processNum == 1) { // there is only the parent, assign specific starting and ending words
         specificStartingWord = 1;
         specificEndingWord = count;
     }
@@ -171,6 +162,9 @@ int main(int argc, char **argv) {
 
     head = (struct list*) malloc (sizeof (struct list));
     current = (struct list*) malloc (sizeof (struct list));
+    if (NULL == current || NULL == head) {
+        printf("Node creation failed.\n");
+    }
     head->count = 0;
     head->next = 0;
     current = head;
@@ -182,9 +176,8 @@ int main(int argc, char **argv) {
     int g;
     int counter = 1;
     
-    
-    while ((input_text = fgetc(file1)) != EOF && counter <= specificEndingWord) { //&& counter <= specificEndingWord) {
-        
+    // read through the file again and actually store words
+    while ((input_text = fgetc(file1)) != EOF && counter <= specificEndingWord) { // read until the ending word is encountered for each process
         if (isalpha(input_text)) {
             // convert it to an alpha and store it in array
             input_text = tolower(input_text);
@@ -194,197 +187,158 @@ int main(int argc, char **argv) {
         }
         else if ((input_text == ' ') | (input_text == '\n')) { // there is a space so the word should end
             // the word should be added to the linked list.
-            printf("temp word AFTER SPACE DETECTED is %s\n", temp_word);
-            
             if (temp_word[0] == '\0') { // counter shouldn't increment because there isn't a word
                 counter--;
             }
-            
             else if (counter < specificStartingWord) {
-                // don't store the word
-                
+                // don't store the word because it is not in the process's range
             }
-            
             else if (head->word[0] == '\0' && counter >= specificStartingWord) {
+                // head is empty so store in head
                 add_first_list_element(temp_word, u);
-                
             }
             else {
                 add_additional_list_element(temp_word, u);
-                
             }
-            
             // set temp_word back to null
             int j;
             for (j = 0; j < u; j++) {
                 temp_word[j] = '\0';
             }
             u = 0;
-            
             counter++;
-            print_test();
         }
         else {} // it is a special character and should be ignored
     }
-    
-    // add last word to last child
+    // add the final word to last child
     i++;
-    printf("i = %d\n", i);
-    if (i == (processNum - 1) && childpid == 0) {
-    
-    printf("ADD LAST WORD TEMP WORD IS %s\n", temp_word);
-    
-    if (temp_word[0] == '\0') { // counter shouldn't increment because there isn't a word
-        //counter--;
-    }
-    else if (counter < specificStartingWord) {
-        // don't store the word
-    }
-    else if (head->word[0] == '\0' && counter >= specificStartingWord) {
-        add_first_list_element(temp_word, u);
-        
-    }
-    else {
-        add_additional_list_element(temp_word, u);
-    }
-    }
-    
-    if (processNum == 1) { // if there is only the parent process
-        // add the final word to the parent
-        printf("ADD LAST WORD TEMP WORD IS %s\n", temp_word);
-        
-        if (temp_word[0] == '\0') { // counter shouldn't increment because there isn't a word
-            //counter--;
+    if (i == (processNum - 1) && childpid == 0) { // it is the final child
+        if (temp_word[0] == '\0') {
+            // counter shouldn't increment because there isn't a word
         }
         else if (counter < specificStartingWord) {
-            // don't store the word
+            // don't store the word because it is not in the process's range
         }
         else if (head->word[0] == '\0' && counter >= specificStartingWord) {
+            // head is empty so store in head
             add_first_list_element(temp_word, u);
-            
         }
         else {
             add_additional_list_element(temp_word, u);
         }
-        print_test();
+    }
+    
+    if (processNum == 1) { // if there is only the parent process- only one running process
+        // add the final word to the parent
+        if (temp_word[0] == '\0') {}
+        else if (head->word[0] == '\0' && counter >= specificStartingWord) {
+            // head is empty so store in head
+            add_first_list_element(temp_word, u);
+        }
+        else {
+            add_additional_list_element(temp_word, u);
+        }
         
-        // ADD EXTRA STUFF!!!!!!!!!!!!!!!!!!!
+        // print linked list to file
+        print_list(file2);
         
+        // stop the clock and print result
+        end = clock();
+        execution_time = (long double)(end - begin) / CLOCKS_PER_SEC;
+        fprintf(file3, "Execution Time: %f seconds\n", execution_time);
+        
+        
+        // close file streams when finished
+        fclose(file1);
+        fclose(file2);
+        fclose(file3);
+        
+        // exit the program
         exit(0);
     }
     
-    // communicate results to the parent
+    // communicate results of the children processes to the parent
     
     struct list *ptr1 = (struct list*) malloc (sizeof (struct list));
     struct list *ptr2 = (struct list*) malloc (sizeof (struct list));
-    int bytesIN;
-    // 0 is reading, 1 is writing
+    struct list *ptr3 = (struct list*) malloc (sizeof (struct list));
+    
+    if (NULL == ptr1 || NULL == ptr2 || NULL == ptr3) {
+        printf("Node creation failed.\n");
+    }
+
+    // 0 is reading, 1 is writing for fd read and write
+    int childCounter = 1; // counts number of words in each child's linked list
+    
     if (childpid == 0) {
+        // it is a child
         i--;
-        //fclose(file1);
-        printf("child\n");
-        print_test();
-        printf("child number is %d\n", i);
-        ptr1 = head;
-        printf("ptr1 is %s\n", ptr1->word);
-        //dup2(fd[i][1], 1);
+        ptr1 = ptr3 = head;
+        // iterate through to count number of words in child's linked list
+        do {
+            ptr3 = ptr3->next;
+            childCounter++;
+        } while(ptr3->next != '\0');
+        // pass number of values in the child list to the parent so that the parent knows how many times to read in the for-loop
         close(fd[i][0]);
-        
-         while (ptr1->word[0] != '\0') {
-            printf("loop val sent is %s\n", ptr1->word);
-            printf("loop count sent is %d\n", ptr1->count);
+        write(fd[i][1], &childCounter, sizeof(childCounter));
+        while (ptr1->word[0] != '\0') { // send the words to the parent through pipes
              write(fd[i][1], ptr1, sizeof(ptr1));
              write(fd[i][1], &ptr1->count, sizeof(ptr1->count));
-             //bytesIN = write(fd[i][1], ptr1, sizeof(ptr1));
-             //printf("bytesIN = %d\n", bytesIN);
-            //if (bytesIN <= 0)
-              //  printf("failed\n");
-            ptr1 = ptr1->next;
+             ptr1 = ptr1->next;
         }
-        
         close(fd[i][1]);
-        exit(0);
+        exit(0); // exit each child process after it sends its information
     }
-    
     else {
-        
-        printf("parent\n");
-        printf("head is %s\n", head->word);
-        print_test();
-        printf("parent waiting\n");
+        // parent waits for all children to finish before reading results
         wait(NULL);
-        printf("parent resume\n");
-        int y;
-        int t;
-        for (t = 0; t < parentCount; t++)
+        int y, t;
+        close(fd[0][1]);
+        read(fd[0][0], &childCounter, sizeof(childCounter));
+        // first for loop reads from the first child
+        for (t = 0; t < childCounter; t++)
         {
-            printf("parentCount is %d\n", parentCount);
-            printf("first for loop\n");
-            //dup2(fd[y][0], 0);
-            close(fd[0][1]);
             read(fd[0][0], ptr2, sizeof(ptr2));
             read(fd[0][0], &ptr2->count, sizeof(ptr2->count));
-            printf("val received is %s\n", ptr2->word);
-            printf("count received is %d\n", ptr2->count);
             sort(ptr2);
-            print_test();
-            
         }
-       //sort(ptr2);
         close(fd[0][0]);
         
-        
-        if (processNum > 2) {
-        for (y = 1; y < (processNum - 1); y++) {
-            printf("second for loop\n");
-            //dup2(fd[y][0], 0);
-            close(fd[y][1]);
-            //int t;
-            for (t = 0; t < childCount; t++)
-            {
-                read(fd[y][0], ptr2, sizeof(ptr2));
-                printf("val received is %s\n", ptr2->word);
-                sort(ptr2);
-            }
-            //sort(ptr2);
-            close(fd[y][0]);
+        // second for loop reads from subsequent children (after first child)
+        if (processNum >= 2) {
+            for (y = 1; y < (processNum - 1); y++) {
+                close(fd[y][1]);
+                read(fd[y][0], &childCounter, sizeof(childCounter));
+                for (t = 0; t < childCounter; t++)
+                {
+                    read(fd[y][0], ptr2, sizeof(ptr2));
+                    read(fd[y][0], &ptr2->count, sizeof(ptr2->count));
+                    sort(ptr2);
+                }
+                close(fd[y][0]);
             }
         }
-        
-        
     }
-    //printf("sort final word\n");
-    //sort(ptr2);
-    
-    //printf("val received after is %s\n", ptr2->word);
-    
-    
-    
-    // print the results to the new files
-    //print_list(file2);
-    printf("made it to the print_test function\n");
-    print_test();
-    
+
+    // print the final results to the new files
+    print_list(file2);
     
     // stop the clock and print result
     end = clock();
     execution_time = (long double)(end - begin) / CLOCKS_PER_SEC;
-    //fprintf(file3, "Execution Time: %f seconds\n", execution_time);
+    fprintf(file3, "Execution Time: %f seconds\n", execution_time);
 
-    
     // close file streams when finished
     fclose(file1);
-    //close(file1);
     fclose(file2);
     fclose(file3);
-    
-    printf("sos?\n");
     
     return 0;
 }
 
+// function to add the initial element in a linked list (head node)
 struct list* add_first_list_element (char val[30], int j) {
-    printf("Add first element function\n");
     struct list *ptr = (struct list*) malloc (sizeof (struct list));
     if (NULL == ptr) {
         printf("Node creation failed.\n");
@@ -399,28 +353,27 @@ struct list* add_first_list_element (char val[30], int j) {
     return ptr;
 }
 
+// function to add to a linked list after there is already a head node
 struct list* add_additional_list_element (char val[30], int j) {
-    printf("Add additional element function\n");
     struct list *ptr = (struct list*) malloc (sizeof (struct list));
     struct list *search_ptr = (struct list*) malloc (sizeof (struct list));
     if (NULL == ptr | NULL == search_ptr) {
         printf("Node creation failed.\n");
     }
+    // call search_list function to see if the value already exists
     bool search;
     search = search_list(val);
-    //printf("search is %d\n", search);
     
     if (search == 1) { // the word already exists-- find the node and increment the count value
-        printf("increment node value\n");
+        // call the find_existing_node function
         search_ptr = find_existing_node(val);
         search_ptr->count++;
-        
     }
-    else { // add a new node
+    else {
+        // the word doesn't exist-- add a new node
+        // call find_prior_node function to find the value right before where the node should be inserted, if there is one
         search_ptr = find_prior_node(val);
-        printf("word in searchptr is %s\n", search_ptr->word);
         if (search_ptr == NULL) { // add the node to the end of the list
-            printf("word goes at end of list\n");
             int i;
             for (i = 0; i < j; i++){
                 ptr->word[i] = val[i];
@@ -434,89 +387,73 @@ struct list* add_additional_list_element (char val[30], int j) {
         else if (search_ptr == head) // the new word becomes the new head or one right after head
         {
             if (strcmp(search_ptr->word, val) > 0) {
-            printf("word becomes new head\n");
-            struct list *switch_ptr = (struct list*) malloc (sizeof (struct list));
-            int i;
-            for (i = 0; i < j; i++){
-                ptr->word[i] = val[i];
-            }
-            
-            ptr->count = 1;
-            
-            switch_ptr = head;
-            printf("word in switch is now %s\n", switch_ptr->word); // hello
-            ptr->next = switch_ptr;
-            
-            
-            head = ptr;
-            printf("word in head is now %s\n", head->word);
-            }
-            else {
-                printf("word goes immediately after %s\n", head->word);
+                // the word becomes the new head node
                 struct list *switch_ptr = (struct list*) malloc (sizeof (struct list));
+                if (switch_ptr == NULL) {
+                    printf("Node creation failed.\n");
+                }
                 int i;
                 for (i = 0; i < j; i++){
                     ptr->word[i] = val[i];
                 }
-                
                 ptr->count = 1;
-                
+                switch_ptr = head;
+                ptr->next = switch_ptr;
+                head = ptr;
+            }
+            else {
+                // word to be inserted immediately after the head node
+                struct list *switch_ptr = (struct list*) malloc (sizeof (struct list));
+                if (switch_ptr == NULL) {
+                    printf("Node creation failed.\n");
+                }
+                int i;
+                for (i = 0; i < j; i++){
+                    ptr->word[i] = val[i];
+                }
+                ptr->count = 1;
                 switch_ptr = head;
                 switch_ptr = switch_ptr->next;
-                
                 head->next = ptr;
                 ptr->next = switch_ptr;
             }
-            
         }
-        else { // word goes into middle of list
+        else { // word goes somewhere in the middle of list
             int i;
             for (i = 0; i < j; i++){
                 ptr->word[i] = val[i];
             }
-            printf("adding word %s after search ptr??\n", ptr->word);
-            printf("word in searchptr is %s\n", search_ptr->word);
-            //printf("new word in ptr is %s\n", ptr->word); // lit
             ptr->count = 1;
-            
             struct list *moving_ptr = (struct list*) malloc (sizeof (struct list));
             if (NULL == moving_ptr) {
                 printf("Node creation failed.\n");
             }
-            
-            moving_ptr = search_ptr; // word in moving ptr is hello
-            moving_ptr = moving_ptr->next; // word in moving ptr is world
+            moving_ptr = search_ptr;
+            moving_ptr = moving_ptr->next;
             ptr->next = moving_ptr;
             search_ptr->next = ptr;
-            
         }
     }
     return ptr;
 }
 
+// adds the words from the child linked lists to the parent list
 struct list* add_additional_list_element_parent (char val[30], int j, int count) {
-    printf("Add additional element PARENT function\n");
     struct list *ptr = (struct list*) malloc (sizeof (struct list));
     struct list *search_ptr = (struct list*) malloc (sizeof (struct list));
     if (NULL == ptr | NULL == search_ptr) {
         printf("Node creation failed.\n");
     }
+    // call search_list function to see if the value already exists
     bool search;
     search = search_list(val);
-    
     if (search == 1) { // the word already exists-- find the node and increment the count value
-        printf("increment node value\n");
         search_ptr = find_existing_node(val);
-        printf("count is %d\n", count);
-        printf("searchptr count is %d\n", search_ptr->count);
         search_ptr->count += count;
-        printf("new searchptr count is %d\n", search_ptr->count);
-        
     }
-    else { // add a new node
+    else { // word doesn't already exist-- add a new node
         search_ptr = find_prior_node(val);
         if (search_ptr == NULL) { // add the node to the end of the list
-            printf("add word to end\n");
             int i;
             for (i = 0; i < j; i++){
                 ptr->word[i] = val[i];
@@ -524,77 +461,65 @@ struct list* add_additional_list_element_parent (char val[30], int j, int count)
             ptr->next = 0;
             ptr->count = count;
             current->next = ptr;
-            printf("word in current is %s\n", current->word);
             current = ptr;
-            printf("new word in current is %s\n", current->word);
-            
-            
         }
         
-        else if (search_ptr == head) // the new word becomes the new head or one right after head
+        else if (search_ptr == head) // the new word becomes the new head or one right after the head
         {
             if (strcmp(search_ptr->word, val) > 0) {
-                printf("word becomes new head\n");
+                // word becomes the new head
                 struct list *switch_ptr = (struct list*) malloc (sizeof (struct list));
+                if (NULL == switch_ptr) {
+                    printf("Node creation failed.\n");
+                }
                 int i;
                 for (i = 0; i < j; i++){
                     ptr->word[i] = val[i];
                 }
-                
                 ptr->count = count;
-                
                 switch_ptr = head;
-                printf("word in switch is now %s\n", switch_ptr->word); // hello
                 ptr->next = switch_ptr;
-                
-                
                 head = ptr;
-                printf("word in head is now %s\n", head->word);
             }
             else {
-                printf("word goes immediately after %s\n", head->word);
+                // word should be inserted right after the headnode
                 struct list *switch_ptr = (struct list*) malloc (sizeof (struct list));
+                if (NULL == switch_ptr) {
+                    printf("Node creation failed.\n");
+                }
                 int i;
                 for (i = 0; i < j; i++){
                     ptr->word[i] = val[i];
                 }
-                
                 ptr->count = count;
-                
                 switch_ptr = head;
                 switch_ptr = switch_ptr->next;
-                
                 head->next = ptr;
                 ptr->next = switch_ptr;
             }
-            
         }
-        else {
+        else { // word should be inserted somewhere in the middle of the list
             int i;
             for (i = 0; i < j; i++){
                 ptr->word[i] = val[i];
             }
-            //printf("new word in ptr is %s\n", ptr->word); // lit
             ptr->count = count;
             
             struct list *moving_ptr = (struct list*) malloc (sizeof (struct list));
             if (NULL == moving_ptr) {
                 printf("Node creation failed.\n");
             }
-            
-            moving_ptr = search_ptr; // word in moving ptr is hello
-            moving_ptr = moving_ptr->next; // word in moving ptr is world
+            moving_ptr = search_ptr;
+            moving_ptr = moving_ptr->next;
             ptr->next = moving_ptr;
             search_ptr->next = ptr;
-            
         }
     }
     return ptr;
 }
 
-
+// search the linked list to see if the value already exists or not-- return true if it does or false if it doesn't
 bool search_list (char val[30]) {
-    //printf("Search function\n");
     struct list *ptr = (struct list*) malloc (sizeof (struct list));
     if (NULL == ptr) {
         printf("Node creation failed.\n");
@@ -603,108 +528,80 @@ bool search_list (char val[30]) {
     int i;
     do {
         i = strcmp(val, ptr->word);
-        //printf("i is %d\n", i); // if val ahead of ptr->word in alphabet then will return a positive number-- keep going until they are equal or negative
         ptr = ptr->next;
     } while (ptr != 0 && i > 0);
-    //printf("end do while\n");
-    
     if (i == 0) {
-        printf("word already exists\n");
         return true;
     }
     
     else {
-        printf("word doesn't already exist\n");
         return false;
     }
-    
 }
 
+// if the word already exists, locate that specific node and return it
 struct list* find_existing_node (char val[30]) {
-    printf("Existing node function\n");
     struct list *ptr = (struct list*) malloc (sizeof (struct list));
     if (NULL == ptr) {
         printf("Node creation failed.\n");
     }
-    
     ptr = head;
     int search;
     search = strcmp(val, ptr->word);
-    //printf("Search is %d\n", search);
+    // while search doesn't equal zero, it hasn't found the word yet
     while (search != 0) {
         ptr = ptr->next;
         search = strcmp(val, ptr->word);
-        //printf("Search is %d\n", search);
     }
-    
     return ptr;
 }
 
+// find the node right before where the new word should be inserted
 struct list* find_prior_node (char val[30]) {
-    printf("Prior node function\n");
-    
     struct list *ptr = (struct list*) malloc (sizeof (struct list));
     struct list *curr = (struct list*) malloc (sizeof (struct list));
-    
     if (NULL == ptr | NULL == curr) {
         printf("Node creation failed.\n");
     }
-    
-    // search the head node. if the head node is greater than val, then move on to the next node and search that node.
-    
     ptr = curr = head;
     int search = 1;
-    
     // search the head node
     search = strcmp(val, curr->word);
-    //printf("Search head node is %d\n", search);
     if (search < 0) {
-        printf("head is being returned\n");
+        // return head because the value is higher in the alphabet than the head
         return head;
     }
     if (ptr->next != NULL) { // move curr to the node ahead of ptr
         curr = curr->next;
-        //printf("word in curr is %s\n", curr->word);
         search = strcmp(val, curr->word);
     }
-    else if (ptr->next == NULL) { // there is only the headnode and the word goes at the end
-        printf("there is only the headnode\n");
+    else if (ptr->next == NULL) { // there is only the headnode and the word goes at the end of the list
         return NULL;
     }
     // will enter while loop if the head node is higher in the alphabet than val
-    // val is lower in the alphabet than the word in the headnode
     while (search > 0 && curr != NULL) {
         // ptr becomes the same as curr
-        //printf("move ptr to next\n");
         ptr = ptr->next;
-        // curr moves to the next node
-        //printf("move curr to next\n");
+        // curr moves head to the next node to search it
         curr = curr->next;
-        // search searches curr node
-        //printf("search curr\n");
+        // search curr node
         if (curr != NULL) {
-            //printf("inside if statement\n");
             search = strcmp(val, curr->word);
-            //printf("Search is %d\n", search);
         }
         else {
             search = 0;
-            //printf("Search is %d\n", search);
         }
     }
     
     if (search < 0) {
-        printf("returning ptr\n");
-        printf("word in ptr is %s\n", ptr->word);
-        printf("word in curr is %s\n", curr->word);
         return ptr;
     }
     else {
-        printf("returning null\n");
         return NULL; // the word should go at the end or beginning
     }
 }
 
+// function to print the list to the file
 void print_list (FILE *file2) {
     struct list *ptr = (struct list*) malloc (sizeof (struct list));
     if (NULL == ptr) {
@@ -714,36 +611,12 @@ void print_list (FILE *file2) {
     do {
         fprintf(file2, "%s, %d\n", ptr->word, ptr->count);
         ptr = ptr->next;
-    }
-    while (ptr->next != 0);
+    } while (ptr->next != 0);
+    // print the final word
     fprintf(file2, "%s, %d\n", ptr->word, ptr->count);
 }
 
-void print_test() {
-    struct list *ptr = (struct list*) malloc (sizeof (struct list));
-    if (NULL == ptr) {
-        printf("Node creation failed\n");
-    }
-    ptr = head;
-    
-    do {
-        printf("%s, %d\n", ptr->word, ptr->count);
-        if (ptr->next == NULL)
-            return;
-        ptr = ptr->next;
-    } while (ptr->next != 0);
-    if (ptr->word[0] != '\0') {
-        printf("%s, %d\n", ptr->word, ptr->count);
-    }
-    printf("finished print function\n");
-}
-
+// function to sort child lists into parent lists-- calls the add_additional_list_element_parent function
 void sort(struct list *new) {
-    printf("inside sort function\n");
-
-    printf("word in the sort function currently is %s\n", new->word);
-    printf("count in the sort function currently is %d\n", new->count);
-    
     add_additional_list_element_parent(new->word, strlen(new->word) + 1, new->count);
-    
 }
