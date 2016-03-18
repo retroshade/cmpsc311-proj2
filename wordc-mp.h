@@ -1,4 +1,4 @@
-//
+// Project 2-- Hayley Sundra and Ryan Mysliwiec
 //  wordc-mp.h
 //  
 
@@ -29,11 +29,11 @@ typedef int bool;
 // function prototypes
 struct list* add_first_list_element (char val[30], int j);
 struct list* add_additional_list_element (char val[30], int j);
+struct list* add_additional_list_element_parent (char val[30], int j, int count);
 bool search_list (char val[30]);
 struct list* find_existing_node (char val[30]);
 struct list* find_prior_node (char val[30]);
 void print_list (FILE *file2);
-void print_test();
 void sort(struct list *new);
 
 #endif /* wordc_mp_h */
