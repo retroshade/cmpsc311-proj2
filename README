@@ -1,0 +1,66 @@
+I - Names
+=======================================================================================
+Ryan Mysliwiec		rwm5592
+Hayley Sundra		hms5333
+=======================================================================================
+
+II - Description
+=======================================================================================
+wordc-mp.c 
+
+The main program, wordc-mp, is used to read a file. The program then takes the file and 
+breaks it up into n number of sections (determined by the user at runtime). The program 
+then creates a pipe, along with (n - 1) child processes. Each of these processes, along 
+with the parent process, will run it's own mini-sort. This is a sort of the subset of 
+words in each section. After counting and sorting all the words within the mini-sort, 
+the child processes will pipe back into the parent process. The parent process will take
+all of these inputs from the pipes and sort them back in with its own mini-sort and 
+adding the amounts of each word from each child process to the amount in its own 
+mini-sort, creating one large sorted and counted file.
+
+wordc-mp.h 
+
+This file contains all of the library files needed, along with any and all function 
+prototypes. In the file, the list list struct is defined, which contains elements for 
+each word, the amount of instances of that word. The file also defines a boolean type 
+that is used when searching through the linked list to see if there is already an 
+instance of any particular word within that list.
+=======================================================================================
+
+III - Difficulties, etc.
+=======================================================================================
+One of the hardest things, which we could have expected, was creating and using the 
+pipes. This difficulty mainly arose because we have never used them before. We also ran into som trouble when piping the final word of the text file back into the parent 
+process. When we initially ran the tests, the last word was being counted a seemingly
+random amount of extra times. At one point, the last word was being "sorted" and counted 5 extra times. Another, 6 extra times. 
+=======================================================================================
+
+IV - System Calls and Library Functions
+=======================================================================================
+malloc(), close(), fopen(), getpid(), fork(), read(), write(), clock(), atoi(), 
+perror(), fgetc(), isalpha(), tolower(), printf(), pipe(), rewind(), exit(), fclose(),
+strcmp(), fprintf()
+=======================================================================================
+
+V - Design Choices
+=======================================================================================
+We decided that we would keep the linked list, since it made the most sense in terms of implementation. We also opted to break the adding of elements to the linked list into 
+multiple different functions, in order to account for the first elemnt in the list, any 
+element throughout the list, and the final element. We decided to implement the file descriptors as 2D arrays. This allowed us to have a specific set for each child.
+=======================================================================================
+
+VI - Performance Results
+=======================================================================================
+Pangur Ban
+
+-
+
+Hamlet
+
+-
+
+Arabian Nights
+
+-
+
+=======================================================================================
