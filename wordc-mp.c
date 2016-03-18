@@ -165,6 +165,9 @@ int main(int argc, char **argv) {
     current = head;
     input_text = '\0';
     
+    //fclose(file1);
+    file1 = fopen(arg1, "r");
+    
     int u = 0;
     int g;
     int counter = 1;
@@ -216,7 +219,7 @@ int main(int argc, char **argv) {
     // add last word
     
     if (temp_word[0] == '\0') { // counter shouldn't increment because there isn't a word
-        counter--;
+        //counter--;
     }
     else if (counter < specificStartingWord) {
         // don't store the word
@@ -227,6 +230,13 @@ int main(int argc, char **argv) {
     }
     else {
         add_additional_list_element(temp_word, u);
+    }
+    
+    
+    if (processNum == 1) { // if there is only the parent process
+        print_test();
+        
+        exit(0);
     }
     
     // communicate results to the parent
@@ -245,8 +255,8 @@ int main(int argc, char **argv) {
         close(fd[i][0]);
         
          while (ptr1->word[0] != '\0') {
-            printf("loop val sent is %s\n", ptr1->word);
-            printf("loop count sent is %d\n", ptr1->count);
+            //printf("loop val sent is %s\n", ptr1->word);
+            //printf("loop count sent is %d\n", ptr1->count);
              write(fd[i][1], ptr1, sizeof(ptr1));
              write(fd[i][1], &ptr1->count, sizeof(ptr1->count));
              //bytesIN = write(fd[i][1], ptr1, sizeof(ptr1));
@@ -273,19 +283,20 @@ int main(int argc, char **argv) {
         {
             printf("parentCount is %d\n", parentCount);
             printf("first for loop\n");
+            //dup2(fd[y][0], 0);
             close(fd[0][1]);
             read(fd[0][0], ptr2, sizeof(ptr2));
             read(fd[0][0], &ptr2->count, sizeof(ptr2->count));
-            printf("val received is %s\n", ptr2->word);
-            printf("count received is %d\n", ptr2->count);
+            //printf("val received is %s\n", ptr2->word);
+            //printf("count received is %d\n", ptr2->count);
             sort(ptr2);
             
         }
-       // sort(ptr2);
+       //sort(ptr2);
         close(fd[0][0]);
         
         
-        if (processNum >= 2) {
+        if (processNum > 2) {
         for (y = 1; y < (processNum - 1); y++) {
             printf("second for loop\n");
             //dup2(fd[y][0], 0);
@@ -294,7 +305,7 @@ int main(int argc, char **argv) {
             for (t = 0; t < childCount; t++)
             {
                 read(fd[y][0], ptr2, sizeof(ptr2));
-                printf("val received is %s\n", ptr2->word);
+                //printf("val received is %s\n", ptr2->word);
                 sort(ptr2);
             }
             //sort(ptr2);
@@ -305,9 +316,9 @@ int main(int argc, char **argv) {
         
     }
     printf("sort final word\n");
-    sort(ptr2);
+    //sort(ptr2);
     
-    printf("val received after is %s\n", ptr2->word);
+    //printf("val received after is %s\n", ptr2->word);
     
     
     
