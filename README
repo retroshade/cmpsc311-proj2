@@ -35,6 +35,13 @@ into som trouble when piping the final word of the text file back into the paren
 process. When we initially ran the tests, the last word was being counted a seemingly
 random amount of extra times. At one point, the last word was being "sorted" and 
 counted 5 extra times. Another, 6 extra times. 
+
+As stated below, when running the program for Arabian Nights, using 2 or 4 processes,
+it took an absurdly long time; to the point where even after a few minutes, the parent 
+still waiing for the child processes to finish doing their mini sort. Because of this,
+there is no relevant data for the time it took for 2 and 4 processes. owever, anything 
+over 8 processes, finished in anwhere from 5 seconds for 10 processes to 9 seconds
+for 100 processes. 
 =======================================================================================
 
 IV - System Calls and Library Functions
@@ -140,15 +147,245 @@ Poject 2 Times
 ---------------------------------------------------------------------------------------
 Pangur Ban
 
+2 Processes
 
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+
+
+Mean - 0.0 seconds
+Standard Deviation - 0.0 seconds
+
+****This is because our type (double and long double) were not sufficient in recording 
+the miniscule amount of time it took to complete the sort and count. The amount of 
+ime was very small, so the output looks like 0.0000000 seconds****
+
+4 Processes
+
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+
+
+Mean - 0.0 seconds
+Standard Deviation - 0.0 seconds
+
+****This is because our type (double and long double) were not sufficient in recording 
+the miniscule amount of time it took to complete the sort and count. The amount of 
+ime was very small, so the output looks like 0.0000000 seconds****
+
+8 Processes
+
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+Execution Time: 0.000000 seconds
+
+
+Mean - 0.0 seconds
+Standard Deviation - 0.0 seconds
+
+****This is because our type (double and long double) were not sufficient in recording 
+the miniscule amount of time it took to complete the sort and count. The amount of 
+ime was very small, so the output looks like 0.0000000 seconds****
 
 Hamlet
 
+2 Processes
 
+Execution Time: 0.480000 seconds
+Execution Time: 0.480000 seconds
+Execution Time: 0.480000 seconds
+Execution Time: 0.480000 seconds
+Execution Time: 0.480000 seconds
+Execution Time: 0.490000 seconds
+Execution Time: 0.470000 seconds
+Execution Time: 0.480000 seconds
+Execution Time: 0.480000 seconds
+Execution Time: 0.480000 seconds
+Execution Time: 0.480000 seconds
+Execution Time: 0.470000 seconds
+Execution Time: 0.470000 seconds
+Execution Time: 0.480000 seconds
+Execution Time: 0.480000 seconds
+Execution Time: 0.490000 seconds
+Execution Time: 0.470000 seconds
+Execution Time: 0.480000 seconds
+Execution Time: 0.470000 seconds
+Execution Time: 0.490000 seconds
+
+Mean - 0.4785 seconds
+Standard Deviation - 0.00587 seconds
+
+4 Processes
+
+Execution Time: 0.330000 seconds
+Execution Time: 0.330000 seconds
+Execution Time: 0.330000 seconds
+Execution Time: 0.320000 seconds
+Execution Time: 0.340000 seconds
+Execution Time: 0.330000 seconds
+Execution Time: 0.320000 seconds
+Execution Time: 0.330000 seconds
+Execution Time: 0.330000 seconds
+Execution Time: 0.330000 seconds
+Execution Time: 0.330000 seconds
+Execution Time: 0.330000 seconds
+Execution Time: 0.330000 seconds
+Execution Time: 0.330000 seconds
+Execution Time: 0.330000 seconds
+Execution Time: 0.330000 seconds
+Execution Time: 0.330000 seconds
+Execution Time: 0.330000 seconds
+Execution Time: 0.330000 seconds
+Execution Time: 0.330000 seconds
+
+Mean - 0.3295 seconds
+Standard Deviation - 0.00394 seconds
+
+8 Processes
+
+Execution Time: 0.330000 seconds
+Execution Time: 0.330000 seconds
+Execution Time: 0.320000 seconds
+Execution Time: 0.320000 seconds
+Execution Time: 0.330000 seconds
+Execution Time: 0.320000 seconds
+Execution Time: 0.320000 seconds
+Execution Time: 0.320000 seconds
+Execution Time: 0.330000 seconds
+Execution Time: 0.320000 seconds
+Execution Time: 0.320000 seconds
+Execution Time: 0.320000 seconds
+Execution Time: 0.320000 seconds
+Execution Time: 0.320000 seconds
+Execution Time: 0.330000 seconds
+Execution Time: 0.320000 seconds
+Execution Time: 0.320000 seconds
+Execution Time: 0.320000 seconds
+Execution Time: 0.330000 seconds
+Execution Time: 0.320000 seconds
+
+Mean - 0.323 seconds
+Standard Deviation - 0.0047 seconds
 
 Arabian Nights
 
+2 Processes
 
+N/A
+
+Our program works perfectly fine for the smaller files. However, when running the 
+program to Arabian Nights with 2 processes, the single child process took several 
+minutes, and the parent was waiting for that long. This led to a hangup (non-fatal)
+that we could gain no useful information from. The program runs extremely slowly
+when using a small amount of processes. However, when we ran the program with 10 
+processes, the program inished successfully in only 5.82 seconds.
+
+This was almost certainly due to our implementation, although we don't exactly know why.
+
+Mean - N/A
+Standard Deviation - N/A
+
+4 Processes
+
+N/A
+
+Our program works perfectly fine for the smaller files. However, when running the 
+program to Arabian Nights with 2 processes, the single child process took several 
+minutes, and the parent was waiting for that long. This led to a hangup (non-fatal)
+that we could gain no useful information from. The program runs extremely slowly
+when using a small amount of processes. However, when we ran the program with 10 
+processes, the program inished successfully in only 5.82 seconds.
+
+This was almost certainly due to our implementation, although we don't exactly know why.
+
+Mean - N/A
+Standard Deviation - N/A
+
+8 Processes
+
+Execution Time: 6.040000 seconds
+Execution Time: 5.990000 seconds
+Execution Time: 6.060000 seconds
+Execution Time: 5.970000 seconds
+Execution Time: 5.920000 seconds
+Execution Time: 5.970000 seconds
+Execution Time: 6.030000 seconds
+Execution Time: 6.010000 seconds
+Execution Time: 5.990000 seconds
+Execution Time: 5.910000 seconds
+Execution Time: 5.980000 seconds
+Execution Time: 5.980000 seconds
+Execution Time: 5.930000 seconds
+Execution Time: 6.000000 seconds
+Execution Time: 6.020000 seconds
+Execution Time: 6.010000 seconds
+Execution Time: 5.960000 seconds
+Execution Time: 5.900000 seconds
+Execution Time: 5.920000 seconds
+Execution Time: 5.990000 seconds
+
+Mean - 5.979 seconds
+Standard Deviation - 0.04483 seconds
+
+When running the program to sort an extremely large file with multiple processes, 
+a large amount of processes are needed, or the program will run significantly slower 
+than the program from the first project.
 
 ---------------------------------------------------------------------------------------
 =======================================================================================
+
+****The program failed the unit tests. We are not sure as to why this happened, but 
+the program outputs correctly every time****
